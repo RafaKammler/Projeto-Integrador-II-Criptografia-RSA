@@ -8,28 +8,53 @@ function App() {
   const [message, setMessage] = useState('');
   const [encryptedText, setEncryptedText] = useState('');
   const [decryptedText, setDecryptedText] = useState('');
+  const [data, setData] = useState('');
 
   const generateKeys = async () => {
-    const response = await fetch('http://localhost:5000/generate_keys', { method: 'POST' });
-    const data = await response.json();
-    setPublicKeyGenerated(data.public_key);
-    setPrivateKeyGenerated(data.private_key);
+    try {
+      const response = await fetch('http://localhost:5000/generate_keys', { method: 'POST' });
+      const data = await response.json();
+      setPublicKeyGenerated(data.public_key);
+      setPrivateKeyGenerated(data.private_key);
+    } catch (error) {
+      console.error('Error generating keys:', error);
+    }
   };
-  const sendInputKeys = async (publicKey, privateKey) => {
-    const response = await fetch('http://localhost:5000/get_public_key_input', {
+
+  const sendInputPublicKey = async (publicKey) => {
+    try {
+      const response = await fetch('http://localhost:5000/get_public_key_input', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            public_key: publicKey,
-            private_key: privateKey
-        })
-    });
+        body: JSON.stringify({ public_key: publicKey })
+      });
+      const data = await response.json();
+      setData(data);
+      return data;
+    } catch (error) {
+      console.error('Error sending public key:', error);
+    }
+  };
 
-    const data = await response.json();
-    return data;
-};
+  const sendInputPrivateKey = async (privateKey) => {
+    try {
+      const response = await fetch('http://localhost:5000/get_private_key_input', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ private_key: privateKey })
+      });
+      const data = await response.json();
+      setData(data);
+      return data;
+    } catch (error) {
+      console.error('Error sending private key:', error);
+    }
+  };
+
   const encryptMessage = async () => {
     try {
       const response = await fetch('http://localhost:5000/encrypt', {
@@ -45,13 +70,27 @@ function App() {
   };
 
   const decryptMessage = async () => {
-    const response = await fetch('http://localhost:5000/decrypt', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ encrypted_text: encryptedText })
-    });
-    const data = await response.json();
-    setDecryptedText(data.decrypted_text);
+    try {
+      const response = await fetch('http://localhost:5000/decrypt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({encryptedText})
+      });
+      const data = await response.json();
+      setDecryptedText(data.decrypted_message);
+    } catch (error) {
+      console.error('Error decrypting message:', error);
+    }
+  };
+
+  const handleEncryptClick = async () => {
+    await sendInputPublicKey(publicKeyInput);
+    await encryptMessage();
+  };
+
+  const handleDecryptClick = async () => {
+    await sendInputPrivateKey(privateKeyInput);
+    await decryptMessage();
   };
 
   return (
@@ -72,12 +111,12 @@ function App() {
           placeholder="Enter message"
         />
         <input
-          type="int"
+          type="text"
           value={publicKeyInput}
           onChange={(e) => setPublicKeyInput(e.target.value)}
           placeholder="Enter public key"
         />
-        <button onClick={sendInputKeys}>Encrypt</button>
+        <button onClick={handleEncryptClick}>Encrypt</button>
         <p>Encrypted Text: {encryptedText}</p>
       </div>
       <div>
@@ -89,12 +128,12 @@ function App() {
           placeholder="Enter encrypted message"
         />
         <input
-          type="int"
+          type="text"
           value={privateKeyInput}
           onChange={(e) => setPrivateKeyInput(e.target.value)}
-          placeholder="Enter Private key"
+          placeholder="Enter private key"
         />
-        <button onClick={decryptMessage}>Decrypt</button>
+        <button onClick={handleDecryptClick}>Decrypt</button>
         <p>Decrypted Text: {decryptedText}</p>
       </div>
     </div>
