@@ -1,24 +1,26 @@
-import math
-import random
 from flask import Flask, request, jsonify
-from base64 import b64encode, b64decode
-import os
 from flask_cors import CORS
 from cryptography import generate_keys, load_keys, encoder, decoder, undo_joined_message
+
+
 app = Flask(__name__)
 CORS(app)
 
-N_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/n.txt'
-PUBLIC_KEY_INPUT = "Projeto-Integrador-II-Criptografia-RSA/backend/app/public_key_input.txt"
-PRIVATE_KEY_INPUT = "Projeto-Integrador-II-Criptografia-RSA/backend/app/private_key_input.txt"
+
+N_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/keys/n.txt'
+PUBLIC_KEY_INPUT = "Projeto-Integrador-II-Criptografia-RSA/backend/app/keys/public_key_input.txt"
+PRIVATE_KEY_INPUT = "Projeto-Integrador-II-Criptografia-RSA/backend/app/keys/private_key_input.txt"
+
 
 _, _, n = load_keys()
+
 
 @app.route('/generate_keys', methods=['POST'])
 def generate_keys_route():
     generate_keys()
     public_key, private_key, _ = load_keys()
     return jsonify({'public_key': public_key, 'private_key': private_key})
+
 
 @app.route('/get_public_key_input', methods=['POST'])
 def get_public_key_input_route():
@@ -28,14 +30,14 @@ def get_public_key_input_route():
     with open(PUBLIC_KEY_INPUT, 'w') as f:
         f.write(str(public_key))
 
-    
-    
+
     return jsonify({'message': 'Keys received successfully', 'public_key': public_key})
 
 @app.route('/get_private_key_input', methods=['POST'])
 def get_private_key_input_route():
     data = request.get_json()
     private_key = int(data.get('private_key'))
+
     with open(PRIVATE_KEY_INPUT, 'w') as f:
         f.write(str(private_key))
 
@@ -51,8 +53,11 @@ def encrypt_route():
         n = int(f.read())
     with open(PUBLIC_KEY_INPUT, 'r') as f:
         public_key = int(f.read())
+
     message_crypto = encoder(message, public_key, n)
     encrypted_message = (' '.join(str(p) for p in message_crypto))
+
+
     return jsonify({'encrypted_text': encrypted_message})
 
 @app.route('/decrypt', methods=['POST'])

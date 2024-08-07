@@ -1,10 +1,13 @@
 import math
 import random
-from base64 import b64encode
-PRIVATE_KEY_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/private_key.txt'
-PUBLIC_KEY_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/public_key.txt'
-N_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/n.txt'
+
+
+PRIVATE_KEY_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/keys/private_key.txt'
+PUBLIC_KEY_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/keys/public_key.txt'
+N_PATH = 'Projeto-Integrador-II-Criptografia-RSA/backend/app/keys/n.txt'
 prime = set()
+
+
 def primefiller():
     sieve = [True] * 250
     sieve[0] = sieve[1] = False
@@ -16,6 +19,7 @@ def primefiller():
         if sieve[i]:
             prime.add(i)
 
+
 def pickrandomprime():
     k = random.randint(0, len(prime) - 1)
     it = iter(prime)
@@ -24,6 +28,7 @@ def pickrandomprime():
     ret = next(it)
     prime.remove(ret)
     return ret
+
 
 def generate_keys():
     primefiller()
@@ -50,6 +55,7 @@ def generate_keys():
     with open(N_PATH, 'w') as file3:
         file3.write(str(n))
 
+
 def load_keys():
     try:
         with open(PUBLIC_KEY_PATH, 'r') as file:
@@ -62,6 +68,7 @@ def load_keys():
     except FileNotFoundError:
         generate_keys()
         return load_keys()
+
 
 def mod_exp(base, exp, mod):
     
@@ -76,11 +83,14 @@ def mod_exp(base, exp, mod):
         base = (base * base) % mod
     return result
 
+
 def encrypt(message, public_key, n):
     return mod_exp(message, public_key, n)
 
+
 def decrypt(encrypted_text, private_key, n):
     return mod_exp(encrypted_text, private_key, n)
+
 
 def encoder(message, public_key, n):
     encoded = []
@@ -88,12 +98,13 @@ def encoder(message, public_key, n):
         encoded.append(encrypt(ord(letter), public_key, n))
     return encoded
 
+
 def decoder(encoded, private_key, n):
     decoded = ''
     for num in encoded:
         decoded += chr(decrypt(num, private_key, n))
     return decoded
 
-def undo_joined_message(joined_message):
 
+def undo_joined_message(joined_message):
     return [int(p) for p in joined_message.split()]

@@ -8,7 +8,7 @@ function App() {
   const [message, setMessage] = useState('');
   const [encryptedText, setEncryptedText] = useState('');
   const [decryptedText, setDecryptedText] = useState('');
-  const [data, setData] = useState('');
+
 
   const generateKeys = async () => {
     try {
@@ -31,7 +31,6 @@ function App() {
         body: JSON.stringify({ public_key: publicKey })
       });
       const data = await response.json();
-      setData(data);
       return data;
     } catch (error) {
       console.error('Error sending public key:', error);
@@ -48,7 +47,6 @@ function App() {
         body: JSON.stringify({ private_key: privateKey })
       });
       const data = await response.json();
-      setData(data);
       return data;
     } catch (error) {
       console.error('Error sending private key:', error);
@@ -95,7 +93,7 @@ function App() {
 
   return (
     <div>
-      <h1>RSA Encryption Demo</h1>
+      <h1>Teste de criptografia RSA</h1>
       <div>
         <h2>Generate Keys</h2>
         <button onClick={generateKeys}>Generate Keys</button>
